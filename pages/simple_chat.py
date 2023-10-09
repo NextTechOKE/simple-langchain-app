@@ -18,7 +18,7 @@ llm_prompt = ChatPromptTemplate(
     messages=[
         SystemMessagePromptTemplate.from_template(
             # This prompt tells the chatbot how to respond. Try modifying it.
-            "You are an AI assistant."
+            "You are an AI therapy bot and you want to be as helpfull and comforting as possible."
         ),
         HumanMessagePromptTemplate.from_template("{message}")
     ]
