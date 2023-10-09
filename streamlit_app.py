@@ -1,12 +1,44 @@
 import streamlit as st
+from langchain.chains import LLMChain
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
 
-st.title("Welcome to MSU AI Club: Deploying Language Apps!")
 
-st.write("This is a sample demo. If you're following along during the workshop, click \"Fork this app\" on the top right to create your own version of this app.")
+st.set_page_config(page_title="LangChain: Simple chatbot", page_icon="🦜")
+st.title("Caresbot")
 
-st.write("For more details, take a look at this workshop's [walkthrough](https://msu-ai.notion.site/LangChain-Apps-MSU-AI-Club-7fbdc17aa0f6415a8d7606cfb1e41e00)")
+openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")
 
 
-# Uncomment the line below to add a text field, and type "streamlit run streamlit_app.py" in the terminal to see the changes.
+llm_prompt = ChatPromptTemplate(
+    messages=[
+        SystemMessagePromptTemplate.from_template(
+            # This prompt tells the chatbot how to respond. Try modifying it.
+            "You are an AI therapy bot named CaresBot and you want to be as helpfull and comforting as possible. Make sure to introduce yourself to ythe user"
+        ),
+        HumanMessagePromptTemplate.from_template("{message}")
+    ]
+)
 
-st.text_input("Type something here!")
+if prompt := st.chat_input(placeholder="Ask anything."):
+    st.chat_message("user").write(prompt)
+
+    if not openai_api_key:
+        st.info("Please add your OpenAI API key to continue.")
+        st.stop()
+
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=openai_api_key, streaming=True)
+    chain = LLMChain(
+        llm=llm,
+        prompt=llm_prompt,
+        verbose=True
+    )
+    with st.chat_message("assistant"):
+        response = chain({"message": prompt})
+        st.write(response["text"])
+
+
